@@ -8,7 +8,7 @@
 
 向量数据库：redis 7.4.2
 
-相关文档：[langchain4j](https://docs.langchain4j.dev/get-started)
+相关文档：[官方文档langchain4j](https://docs.langchain4j.dev/get-started)
 
 ## 启动
 
@@ -41,6 +41,14 @@
 2、websearch
 
 3、对话历史记录持久化
+
+
+
+## 常见问题
+
+Q：为什么不使用自动装配的spring-boot-start
+
+A：目前自动装配代码不完善，比如千问chatModel不会自动装配ChatModelListener；另外，这个一个学习项目，使用Advanced或Naive的Api更有利于对框架的学习和理解
 
 
 
