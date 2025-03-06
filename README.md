@@ -8,6 +8,8 @@
 
 向量数据库：redis 7.4.2
 
+相关文档：[langchain4j](https://docs.langchain4j.dev/get-started)
+
 ## 启动
 
 1、**（必选）**从阿里云百炼获取到apikey，设置到系统环境变量API_KEY_DASH_SCOPE，也可将配置文件中的API_KEY_DASH_SCOPE替换为自己的apikey
