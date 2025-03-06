@@ -1,0 +1,37 @@
+server:
+  port: 16070
+spring:
+  application:
+    name: langchain4j-springboot
+
+langchain4j:
+  community:
+    dashscope:
+      chat-model:
+        api-key: ${API_KEY_DASH_SCOPE}
+        model-name: qwen-max
+        temperature: 0.7
+      streaming-chat-model:
+        api-key: ${API_KEY_DASH_SCOPE}
+        model-name: qwen-max
+        temperature: 0.7
+      embeddingModel:
+        api-key: ${API_KEY_DASH_SCOPE}
+        model-name: text-embedding-v2
+
+gaode:
+  baseUrl: https://restapi.amap.com/v3/weather/weatherInfo
+  api-key: ${API_KEY_GAODE}
+
+redis:
+  host: localhost
+  port: 16379
+  #如果开启了认证，需要设置用户名和密码，用户名如未设置则使用default
+  username: default
+  password: 123456
+
+logging:
+  level:
+    dev:
+      langchain4j: debug
+      ai4j: debug
