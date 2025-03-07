@@ -30,7 +30,7 @@ redis:
   username: default
   password: 123456
 
-# 文档https://docs.searxng.org/
+# searxng。国内搜索引擎支持较差。用它的主要原因是免费。文档https://docs.searxng.org/
 searxng:
   base-url: http://localhost:19112/
   engines: 360search  # 搜索引擎，逗号隔开

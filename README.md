@@ -18,9 +18,16 @@
 
 3、（可选）天气api使用的是高德的，如需天气工具可从高德开发者平台可申请到apikey，设置到系统环境变量API_KEY_GAODE
 
+4、（可选）需要联网搜索功能时，需要安装[searxng](https://docs.searxng.org/index.html)，国内搜索引擎支持较差。用它的主要原因是免费。[docker部署](https://docs.searxng.org/admin/installation-docker.html)，以下为部署命令，部署完成后修改application.yaml中searxng下的相关配置
+
+```
+docker pull searxng/searxng
+docker run --rm  -p 宿主机端口:8080 -v "持久卷:/etc/searxng"  -e "BASE_URL=http://宿主机Ip:宿主机端口/" -e "INSTANCE_NAME=my-instance" --name searxng -d  searxng/searxng
+```
 
 
-## Features
+
+## 功能
 
 0、日志（基于ChatModelListener，方便debug和学习）
 
@@ -32,6 +39,8 @@
 
 4、EmbeddingStoreRAG
 
+5、联网搜索websearch，支持开关
+
 
 
 ## Todo
@@ -40,15 +49,13 @@
 
 2、根据传入的文件添加额外信息
 
-3、联网搜索websearch
+3、对话历史记录持久化
 
-4、对话历史记录持久化
+4、GraphRag，知识图谱，结合大模型实现文档到图数据库
 
-5、GraphRag，知识图谱，结合大模型实现文档到图数据库
+5、多模态支持
 
-6、多模态支持
-
-7、接入更多的ai平台，ollama，deepseek...
+6、接入更多的ai平台，ollama，deepseek...
 
 
 
