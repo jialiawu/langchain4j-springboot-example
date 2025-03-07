@@ -17,22 +17,22 @@ import java.util.Map;
  */
 public class DbChatMemoryStore implements ChatMemoryStore {
 
-    Map<Long, List<ChatMessage>> memory = new HashMap<>();
+    Map<String, List<ChatMessage>> memory = new HashMap<>();
 
     @Override
     public List<ChatMessage> getMessages(Object memoryId) {
-        List<ChatMessage> chatMessages = memory.get((Long) memoryId);
+        List<ChatMessage> chatMessages = memory.get((String) memoryId);
         return chatMessages != null ? chatMessages : List.of();
     }
 
     @Override
     public void updateMessages(Object memoryId, List<ChatMessage> messages) {
         //todo 有淘汰机制，如何全量入库？？
-        memory.put((Long) memoryId, messages);
+        memory.put((String) memoryId, messages);
     }
 
     @Override
     public void deleteMessages(Object memoryId) {
-        memory.remove((Long)memoryId);
+        memory.remove((String)memoryId);
     }
 }

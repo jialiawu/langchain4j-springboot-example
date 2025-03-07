@@ -1,6 +1,5 @@
 package com.study.langchain4jspringboot.ai.rag;
 
-import dev.langchain4j.community.web.search.searxng.SearXNGWebSearchEngine;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.input.PromptTemplate;
@@ -14,7 +13,7 @@ import dev.langchain4j.rag.query.router.DefaultQueryRouter;
 import dev.langchain4j.rag.query.router.QueryRouter;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.web.search.WebSearchEngine;
-import dev.langchain4j.web.search.searchapi.SearchApiWebSearchEngine;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -51,45 +50,31 @@ public class RagConfiguration {
                 .build();
     }
 
-    //todo WebSearch
-//    @Bean
-//    public ContentRetriever webSearchContentRetriever(){
-////        WebSearchEngine webSearchEngine = TavilyWebSearchEngine.builder()
-////                .apiKey(System.getenv("TAVILY_API_KEY")) // get a free key: https://app.tavily.com/sign-in
-////                .build();
-//
-//        Map<String, Object> optionalParameters = new HashMap<>();
-//        optionalParameters.put("gl", "us");
-//        optionalParameters.put("hl", "en");
-//        optionalParameters.put("google_domain", "google.com");
-//
-//
-//        SearchApiWebSearchEngine webSearchEngine = SearchApiWebSearchEngine.builder()
 
-    /// /                .apiKey(SEARCHAPI_API_KEY)
-//                .engine("google")
-//                .optionalParameters(optionalParameters)
-//                .build();
-//
-//        SearXNGWebSearchEngine.builder()
-//                .baseUrl()
-//
-//
-//        return WebSearchContentRetriever.builder()
-//                .webSearchEngine(webSearchEngine)
-//                .maxResults(3)
-//                .build();
-//    }
     @Bean
-    public RetrievalAugmentor retrievalAugmentor(ContentRetriever embeddingStoreContentRetriever) {
-        QueryRouter queryRouter = new DefaultQueryRouter(embeddingStoreContentRetriever);
+    public ContentRetriever webSearchContentRetriever(WebSearchEngine webSearchEngine) {
+        return WebSearchContentRetriever.builder()
+                .webSearchEngine(webSearchEngine)
+                .maxResults(5)
+                .build();
+    }
+
+    @Bean
+    public RetrievalAugmentor retrievalAugmentor(@Qualifier("embeddingStoreContentRetriever") ContentRetriever embeddingStoreContentRetriever,
+                                                 @Qualifier("webSearchContentRetriever") ContentRetriever webSearchContentRetriever) {
+        //默认路由
+//        QueryRouter queryRouter = new DefaultQueryRouter(embeddingStoreContentRetriever, webSearchContentRetriever);
+        //联网开关路由
+        QueryRouter queryRouter = new SwitchQueryRouter(embeddingStoreContentRetriever, webSearchContentRetriever);
+        //todo Prompt管理
         PromptTemplate promptTemplate = PromptTemplate.from(
                 """
-                    {{userMessage}}
-                    
-                    --------------------------
-                    2、检索到的信息
-                    {{contents}}""");
+                        {{userMessage}}
+                        
+                        综合以下相关信息回答问题
+                        --------------------------
+                        检索到的信息
+                        {{contents}}""");
         return DefaultRetrievalAugmentor.builder()
                 .contentInjector(DefaultContentInjector.builder()
                         .promptTemplate(promptTemplate)

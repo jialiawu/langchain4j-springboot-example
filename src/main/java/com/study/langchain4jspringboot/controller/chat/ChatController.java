@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
-import cn.hutool.json.JSONUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.study.langchain4jspringboot.ai.assistant.QwenAssistant;
@@ -13,7 +12,6 @@ import dev.langchain4j.rag.content.Content;
 import dev.langchain4j.service.TokenStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,31 +45,32 @@ public class ChatController {
     private final ObjectMapper objectMapper;
 
     @GetMapping("/new-session")
-    public Long newSession() {
-        Snowflake snowflake = IdUtil.getSnowflake(1, 1);
-        return snowflake.nextId();
+    public String newSession() {
+        return IdUtil.simpleUUID();
     }
 
     @GetMapping(value = "/stream/flux", produces = TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> chatStreamFlux(@RequestParam(value = "sessionId") Long sessionId,
-                                   @RequestParam(value = "message") String message,
-                                   @RequestParam(value = "role", required = false, defaultValue = "智能问答助手") String role,
-                                   @RequestParam(value = "extraInfo", required = false, defaultValue = "") String extraInfo) {
-        return qwenAssistant.chatStream(sessionId, role, message, extraInfo);
+    public Flux<String> chatStreamFlux(@RequestParam(value = "sessionId") String sessionId,
+                                       @RequestParam(value = "role", required = false, defaultValue = "智能问答助手") String role,
+                                       @RequestParam(value = "question") String question,
+                                       @RequestParam(value = "webSearchEnable", required = false, defaultValue = "false") Boolean webSearchEnable,
+                                       @RequestParam(value = "extraInfo", required = false, defaultValue = "") String extraInfo) {
+        return qwenAssistant.chatStreamFlux(sessionId, role, question, extraInfo);
     }
 
     @GetMapping(value = "/stream/sse", produces = TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<String>> chatStreamSse(@RequestParam(value = "sessionId") Long sessionId,
-                                                     @RequestParam(value = "message") String message,
-                                                     @RequestParam(value = "role", required = false, defaultValue = "智能问答助手") String role,
-                                                     @RequestParam(value = "extraInfo", required = false, defaultValue = "") String extraInfo) {
+    public Flux<ServerSentEvent<String>> chatStreamSse(@RequestParam(value = "sessionId") String sessionId,
+                                                       @RequestParam(value = "role", required = false, defaultValue = "智能问答助手") String role,
+                                                       @RequestParam(value = "question") String question,
+                                                       @RequestParam(value = "webSearchEnable", required = false, defaultValue = "false") Boolean webSearchEnable,
+                                                       @RequestParam(value = "extraInfo", required = false, defaultValue = "") String extraInfo) {
         //参考的源码里的写法
         Sinks.Many<ServerSentEvent<String>> sink = Sinks.many().unicast().onBackpressureBuffer();
 
-        TokenStream tokenStream = qwenAssistant.chatStream1(sessionId, role, message, extraInfo);
-        tokenStream.onPartialResponse(partialResponse -> sink.tryEmitNext(ServerSentEvent.builder(partialResponse).event("AiMessage").build()));
+        TokenStream tokenStream = qwenAssistant.chatStreamTokenStream(sessionId, role, question, extraInfo);
         tokenStream.onRetrieved(contents ->
                 sink.tryEmitNext(ServerSentEvent.builder(toJson(convert(contents))).event("Retrieved").build()));
+        tokenStream.onPartialResponse(partialResponse -> sink.tryEmitNext(ServerSentEvent.builder(partialResponse).event("AiMessage").build()));
         tokenStream.onError(sink::tryEmitError);
         tokenStream.onCompleteResponse(aiMessageResponse -> sink.tryEmitComplete());
         tokenStream.start();
@@ -96,7 +95,7 @@ public class ChatController {
             String url = content.textSegment().metadata().getString(URL);
             String fileName = Optional.ofNullable(content.textSegment().metadata().getString(FILE_NAME)).orElse(FileUtil.getName(url));
             String absolutePath = Optional.ofNullable(content.textSegment().metadata().getString(ABSOLUTE_DIRECTORY_PATH)).orElse("");
-            return new RetrievedRecord(url, fileName, absolutePath);
+            return new RetrievedRecord(fileName, url, absolutePath);
         }).collect(Collectors.toSet());
     }
 

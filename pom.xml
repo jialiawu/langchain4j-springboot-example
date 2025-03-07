@@ -92,11 +92,11 @@
 			<artifactId>langchain4j-community-redis</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>dev.langchain4j</groupId>
-			<artifactId>langchain4j-web-search-engine-searchapi</artifactId>
-			<version>1.0.0-beta1</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>dev.langchain4j</groupId>-->
+<!--			<artifactId>langchain4j-web-search-engine-searchapi</artifactId>-->
+<!--			<version>1.0.0-beta1</version>-->
+<!--		</dependency>-->
 
 
 		<dependency>

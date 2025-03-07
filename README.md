@@ -28,19 +28,27 @@
 
 2、FunctionCall，实现了一些简单的工具
 
-3、知识库，可上传文件、url
+3、知识库，可上传文件、url，支持的文件格式见[Tika](https://tika.apache.org/2.9.1/formats.html)
 
-4、RAG
+4、EmbeddingStoreRAG
 
 
 
 ## Todo
 
-1、根据传入的文件添加额外信息
+1、提示器Prompt管理
 
-2、websearch
+2、根据传入的文件添加额外信息
 
-3、对话历史记录持久化
+3、联网搜索websearch
+
+4、对话历史记录持久化
+
+5、GraphRag，知识图谱，结合大模型实现文档到图数据库
+
+6、多模态支持
+
+7、接入更多的ai平台，ollama，deepseek...
 
 
 

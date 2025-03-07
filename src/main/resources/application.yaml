@@ -30,6 +30,11 @@ redis:
   username: default
   password: 123456
 
+# 文档https://docs.searxng.org/
+searxng:
+  base-url: http://localhost:19112/
+  engines: 360search  # 搜索引擎，逗号隔开
+
 logging:
   level:
     dev:
