@@ -75,10 +75,10 @@ public class RagConfiguration {
                         --------------------------
                         检索到的信息
                         {{contents}}""");
+        DefaultContentInjector contentInjector = DefaultContentInjector.builder().promptTemplate(promptTemplate).build();
+
         return DefaultRetrievalAugmentor.builder()
-                .contentInjector(DefaultContentInjector.builder()
-                        .promptTemplate(promptTemplate)
-                        .build())
+                .contentInjector(contentInjector)
                 .queryRouter(queryRouter)
                 .build();
     }
