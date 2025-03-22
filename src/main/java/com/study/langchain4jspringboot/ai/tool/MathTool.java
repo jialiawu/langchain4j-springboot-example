@@ -5,6 +5,7 @@ import dev.langchain4j.agent.tool.Tool;
 import org.springframework.stereotype.Component;
 
 /**
+ * 数学工具
  * @author:wjl
  * @see:
  * @since:

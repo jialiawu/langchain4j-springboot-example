@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 联网搜索引擎配置
  * @author:wjl
  * @see:
  * @since:
@@ -23,6 +24,11 @@ import java.util.Map;
 @EnableConfigurationProperties(SearxngProperties.class)
 public class WebSearchConfiguration {
 
+    /**
+     * 构建searxng联网搜索引擎
+     * @param properties searxng配置项
+     * @return
+     */
     @Bean
     public WebSearchEngine searXNGWebSearchEngine(SearxngProperties properties) {
         Map<String, Object> additionalParams = new HashMap<>();

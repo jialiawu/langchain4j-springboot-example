@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 /**
+ * 系统工具
  * @author:wjl
  * @see:
  * @since:

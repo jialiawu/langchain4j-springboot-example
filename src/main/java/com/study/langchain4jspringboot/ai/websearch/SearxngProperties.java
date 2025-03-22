@@ -4,6 +4,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
+ * searxng配置
  * @author:wjl
  * @see:
  * @since:

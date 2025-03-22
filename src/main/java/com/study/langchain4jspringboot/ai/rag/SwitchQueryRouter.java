@@ -44,6 +44,7 @@ public class SwitchQueryRouter implements QueryRouter {
         HttpServletRequest request = requestAttributes.getRequest();
         boolean webSearchEnable = Boolean.parseBoolean(request.getParameter("webSearchEnable"));
         if (!webSearchEnable) {
+            //开关关闭，不走联网检索
             return contentRetrievers.stream().filter(contentRetriever -> !(contentRetriever instanceof WebSearchContentRetriever)).toList();
         }
         return contentRetrievers;

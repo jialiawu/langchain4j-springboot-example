@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * 文档配置
  * @author:wjl
  * @see:
  * @since:
@@ -20,13 +21,22 @@ public class DocumentConfiguration {
 
     //fixme 以下两个bean待验证线程安全
 
+    /**
+     * 文档解析器，使用apache tika解析
+     * @return
+     */
     @Bean
     public DocumentParser documentParser(){
         return new ApacheTikaDocumentParser();
     }
 
+    /**
+     * 文档切分器，使用段落递归切分
+     * @return
+     */
     @Bean
     public DocumentSplitter documentSplitter(){
+        // 段落最大长度300，段落间最大重叠字符20
         return DocumentSplitters.recursive(300, 20);
     }
 

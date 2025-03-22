@@ -9,9 +9,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * 可观测性
+ */
 @Configuration
 public class LogConfiguration {
 
+    /**
+     * 日志监听器，打印请求、响应、错误日志
+     * @return
+     */
     @Bean
     public ChatModelListener logModelListener() {
 

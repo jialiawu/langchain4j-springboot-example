@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 自定义的记忆存储
  * @author:wjl
  * @see:
  * @since:

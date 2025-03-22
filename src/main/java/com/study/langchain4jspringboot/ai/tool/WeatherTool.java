@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
+ * 天气工具
  * @author:wjl
  * @see:
  * @since:
@@ -27,6 +28,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WeatherTool implements ITool{
 
+    /**
+     * 高德天气API
+     */
     private final GaodeWeather gaodeWeather;
 
     @Tool("获取天气信息")

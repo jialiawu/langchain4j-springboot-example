@@ -1,6 +1,7 @@
 package com.study.langchain4jspringboot.ai.tool;
 
 /**
+ * 工具类接口，方便从容器中获取到所有的实现类
  * @author:wjl
  * @see:
  * @since:

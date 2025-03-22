@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 /**
+ * 嵌入模型配置
  * @author:wjl
  * @see:
  * @since:
@@ -27,6 +28,11 @@ public class EmbeddingModelConfiguration {
 //        return new BgeSmallEnV15QuantizedEmbeddingModel();
 //    }
 
+    /**
+     * 千问嵌入模型
+     * @param qwenProperties 千问配置参数
+     * @return
+     */
     @Bean
     @Primary
     public EmbeddingModel qwenEmbeddingModel (QwenProperties qwenProperties){

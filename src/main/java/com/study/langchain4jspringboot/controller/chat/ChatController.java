@@ -2,12 +2,12 @@ package com.study.langchain4jspringboot.controller.chat;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.study.langchain4jspringboot.ai.assistant.QwenAssistant;
-import com.study.langchain4jspringboot.controller.chat.dto.RetrievedRecord;
+import com.study.langchain4jspringboot.controller.chat.vo.RetrievedRecordResponse;
 import dev.langchain4j.rag.content.Content;
 import dev.langchain4j.service.TokenStream;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +23,7 @@ import reactor.core.publisher.Sinks;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.study.langchain4jspringboot.convert.ContentConvert.convertToRecord;
 import static dev.langchain4j.data.document.Document.*;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 
@@ -40,15 +41,34 @@ import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 @Slf4j
 public class ChatController {
 
+    /**
+     * AI SERVICE
+     */
     private final QwenAssistant qwenAssistant;
 
     private final ObjectMapper objectMapper;
 
+    /**
+     * 创建一个新的会话
+     *
+     * @return 会话id
+     */
     @GetMapping("/new-session")
     public String newSession() {
+        //此处可将session于用户做关联，以保存一些常用的信息
         return IdUtil.simpleUUID();
     }
 
+    /**
+     * 流式聊天
+     *
+     * @param sessionId       会话id
+     * @param role            设定角色
+     * @param question        原始问题
+     * @param webSearchEnable 是否开启网页搜索
+     * @param extraInfo       额外信息（暂未实现）
+     * @return
+     */
     @GetMapping(value = "/stream/flux", produces = TEXT_EVENT_STREAM_VALUE)
     public Flux<String> chatStreamFlux(@RequestParam(value = "sessionId") String sessionId,
                                        @RequestParam(value = "role", required = false, defaultValue = "智能问答助手") String role,
@@ -58,6 +78,16 @@ public class ChatController {
         return qwenAssistant.chatStreamFlux(sessionId, role, question, extraInfo);
     }
 
+    /**
+     * 流式聊天（SSE），方便前端根据KEY渲染不同的内容
+     *
+     * @param sessionId       会话id
+     * @param role            设定角色
+     * @param question        原始问题
+     * @param webSearchEnable 是否开启网页搜索
+     * @param extraInfo       额外信息（暂未实现）
+     * @return
+     */
     @GetMapping(value = "/stream/sse", produces = TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<String>> chatStreamSse(@RequestParam(value = "sessionId") String sessionId,
                                                        @RequestParam(value = "role", required = false, defaultValue = "智能问答助手") String role,
@@ -68,35 +98,18 @@ public class ChatController {
         Sinks.Many<ServerSentEvent<String>> sink = Sinks.many().unicast().onBackpressureBuffer();
 
         TokenStream tokenStream = qwenAssistant.chatStreamTokenStream(sessionId, role, question, extraInfo);
+        //rag回调
         tokenStream.onRetrieved(contents ->
-                sink.tryEmitNext(ServerSentEvent.builder(toJson(convert(contents))).event("Retrieved").build()));
+                //前端可监听Retrieved时间，展示命中的文件
+                sink.tryEmitNext(ServerSentEvent.builder(toJson(convertToRecord(contents))).event("Retrieved").build()));
+        //消息片段回调
         tokenStream.onPartialResponse(partialResponse -> sink.tryEmitNext(ServerSentEvent.builder(partialResponse).event("AiMessage").build()));
+        //错误回调
         tokenStream.onError(sink::tryEmitError);
+        //结束回调
         tokenStream.onCompleteResponse(aiMessageResponse -> sink.tryEmitComplete());
         tokenStream.start();
-
         return sink.asFlux();
-    }
-
-    private Set<RetrievedRecord> convert(List<Content> contents) {
-        if (CollUtil.isEmpty(contents)) {
-            return Collections.emptySet();
-        }
-        TreeSet<Content> urlContentSet = contents.stream()
-                .filter(content ->
-                        content.textSegment() != null && content.textSegment().metadata() != null
-                                && content.textSegment().metadata().containsKey(URL))
-                .collect(Collectors.toCollection(() ->
-                        new TreeSet<>(Comparator.comparing(content -> content.textSegment().metadata().getString(URL)))));
-        if (CollUtil.isEmpty(urlContentSet)) {
-            return Collections.emptySet();
-        }
-        return urlContentSet.stream().map(content -> {
-            String url = content.textSegment().metadata().getString(URL);
-            String fileName = Optional.ofNullable(content.textSegment().metadata().getString(FILE_NAME)).orElse(FileUtil.getName(url));
-            String absolutePath = Optional.ofNullable(content.textSegment().metadata().getString(ABSOLUTE_DIRECTORY_PATH)).orElse("");
-            return new RetrievedRecord(fileName, url, absolutePath);
-        }).collect(Collectors.toSet());
     }
 
     private <D> String toJson(D t) {
