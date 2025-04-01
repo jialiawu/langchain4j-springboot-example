@@ -75,7 +75,7 @@ public class DocumentController {
     @PostMapping("/load/resource")
     @Deprecated
     public String resourceDocumentEmbeddingAndStore() {
-        List<Document> documentList = ClassPathDocumentLoader.loadDocuments("documents/*.txt", documentParser);
+        List<Document> documentList = ClassPathDocumentLoader.loadDocuments("documents", documentParser);
         List<String> ids = embeddingAndStore(documentList);
         return StrUtil.format("将{}个文档，切分为：{}个段存入向量库", documentList.size(), ids.size());
     }
